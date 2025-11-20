@@ -1,0 +1,16 @@
+1. Strategy:
+    
+
+2. Analytical Runtime:
+    When the approximation algorithm runs, it goes through
+    each vertex. For each vertex, it checks all of that vertex's
+    neighbors and assigns the vertex the minimum color that isn't
+    used by its neighbors. Looping through each vertex is O(V),
+    checking a vertex's neighbors and assigning the minimum color
+    relative to its neighbors each take degree of V steps.
+    We know that the sum of degree of V for all vertices is 2E,
+    so the total analytical runtime is O(V + E) which runs in polynomial time.
+
+3. Gradescope performance:
+
+4. Test cases:

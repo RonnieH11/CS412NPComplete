@@ -53,14 +53,14 @@ def min_graph_coloring_approx(adj_list):
     for v in vertices:
         # Find all the colors adjacent to v
         seen_colors = set()
-        # Degree of E O(E)
+        # Degree of V
         for neighbor in adj_list[v]:
             if neighbor in vertex_colors:
                 seen_colors.add(vertex_colors[neighbor])
 
         # Assign the lowest color that isn't used by the neighbors
         color = 0
-        # O(E)
+        # Degree of V
         while color in seen_colors:
             color += 1
         vertex_colors[v] = color
