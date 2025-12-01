@@ -43,65 +43,120 @@ import sys
 
 def read_graph(stream):
     """
-    Read an undirected graph with numeric vertex labels 0..n-1
-    from the given text stream (file or stdin).
+    Read an undirected graph from the given text stream.
 
-    Supports both header formats:
-        n
-        n m
+    Supported headers:
+        n m      (typical)
+        m        (edge count only)
 
+    Vertices are determined from the edge endpoints. If there are no edges
+    but an n was provided, we assume vertices 0..n-1 exist (isolated).
     Returns:
-        graph          : dict[int, set[int]] adjacency list
-        index_to_label : list[str] where index_to_label[i] = str(i)
+        graph          : dict[int, set[int]] adjacency list on indices 0..N-1
+        index_to_label : list[str] mapping index -> original vertex label
     """
+    # Read first non-empty line
     header = stream.readline()
     if not header:
-        # Empty input
         return {}, []
 
     header = header.strip()
-    if not header:
-        # Skip empty lines at start if any
-        while header == "":
-            header = stream.readline()
-            if not header:
-                return {}, []
-            header = header.strip()
+    while header == "":
+        header = stream.readline()
+        if not header:
+            return {}, []
+        header = header.strip()
 
     parts = header.split()
-    if len(parts) == 1:
-        n = int(parts[0])
+
+    edges = []
+    vertex_labels = set()
+    header_n = None   # number of vertices from header (if any)
+    header_m = None   # number of edges from header / first line (if any)
+
+    def add_edge(u_lbl, v_lbl):
+        # skip self loops
+        if u_lbl == v_lbl:
+            return
+        vertex_labels.add(u_lbl)
+        vertex_labels.add(v_lbl)
+        edges.append((u_lbl, v_lbl))
+
+    # Helper to read up to m edges or until EOF
+    def read_m_edges(m):
+        read_edges = 0
+        while read_edges < m:
+            line = stream.readline()
+            if not line:
+                break
+            line = line.strip()
+            if not line:
+                continue
+            tokens = line.split()
+            if len(tokens) != 2:
+                continue
+            u_lbl, v_lbl = tokens
+            add_edge(u_lbl, v_lbl)
+            read_edges += 1
+
+    # Parse the header
+    if len(parts) == 2 and all(p.lstrip("-").isdigit() for p in parts):
+        # n m format
+        header_n = int(parts[0])
+        header_m = int(parts[1])
+        read_m_edges(header_m)
+
+    elif len(parts) == 1 and parts[0].lstrip("-").isdigit():
+        # Single integer: treat as edge count m
+        header_m = int(parts[0])
+        read_m_edges(header_m)
+
     elif len(parts) == 2:
-        n = int(parts[0])
-        # m = int(parts[1])  # we don't actually need m
+        # Not numeric "n m": treat as first edge u v
+        u_lbl, v_lbl = parts
+        add_edge(u_lbl, v_lbl)
+        for line in stream:
+            line = line.strip()
+            if not line:
+                continue
+            tokens = line.split()
+            if len(tokens) != 2:
+                continue
+            u_lbl, v_lbl = tokens
+            add_edge(u_lbl, v_lbl)
+
     else:
-        raise ValueError("First line must be 'n' or 'n m'")
+        raise ValueError("Unexpected header format")
 
-    # Initialize adjacency list for all vertices 0..n-1
-    graph = {i: set() for i in range(n)}
+    # If we saw no vertices but do know n, assume isolated vertices 0..n-1
+    if not vertex_labels and header_n is not None:
+        vertex_labels.update(str(i) for i in range(header_n))
 
-    # Read edges until EOF
-    for line in stream:
-        line = line.strip()
-        if not line:
-            continue
-        tokens = line.split()
-        if len(tokens) != 2:
-            # Ignore malformed lines silently; or raise if your spec demands
-            continue
-        u_str, v_str = tokens
-        u = int(u_str)
-        v = int(v_str)
+    # Still nothing? Empty graph.
+    if not vertex_labels:
+        return {}, []
+
+    # Map original labels -> 0..N-1, with numeric labels sorted numerically
+    def label_key(lbl: str):
+        s = lbl.lstrip("-")
+        if s.isdigit():
+            return (0, int(lbl))
+        return (1, lbl)
+
+    labels_sorted = sorted(vertex_labels, key=label_key)
+    label_to_index = {lbl: i for i, lbl in enumerate(labels_sorted)}
+    index_to_label = labels_sorted[:]  # preserve order
+
+    # Build adjacency list on indices
+    graph = {i: set() for i in range(len(labels_sorted))}
+    for u_lbl, v_lbl in edges:
+        u = label_to_index[u_lbl]
+        v = label_to_index[v_lbl]
         if u == v:
             continue
-        if 0 <= u < n and 0 <= v < n:
-            graph[u].add(v)
-            graph[v].add(u)
-        else:
-            # Ignore out-of-range vertices; or raise if required
-            continue
+        graph[u].add(v)
+        graph[v].add(u)
 
-    index_to_label = [str(i) for i in range(n)]
     return graph, index_to_label
 
 
