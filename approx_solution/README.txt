@@ -1,5 +1,5 @@
-cs412_mingraphcoloring_approx.py takes in a txt file and returns
-the number of colors used and the vertices with their colors.
+cs412_mingraphcoloring_approx.py takes in a txt file containing the vertice edge connections
+and returns the number of colors used and a list of the vertices with their colors.
 
 To run the program, in the terminal type "Get-Content test_Cases/test.txt | python cs412_mingraphcoloring_approx.py"
 
