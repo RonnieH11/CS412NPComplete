@@ -1,5 +1,5 @@
 """
-cs412_mingraphcoloring_approx.py
+cs412_mingraphcolor_approx.py
 
 Approximation algorithm to solve min
 vertex color problem in polynomial time.
