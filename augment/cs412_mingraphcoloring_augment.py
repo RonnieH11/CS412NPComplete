@@ -1,40 +1,58 @@
 import sys
 import numpy as np
+import math
 
 def read_graph_from_stdin():
-    vertices = set()
     edges = []
+    vertices = set()
+
     for line in sys.stdin:
         line = line.strip()
         if not line or line.startswith("#"):
             continue
+
         parts = line.split()
-        u, v = parts[0], parts[1]
-        vertices.update([u, v])
+        if len(parts) != 2:
+            continue
+
+        u, v = parts
+        vertices.add(u)
+        vertices.add(v)
         edges.append((u, v))
-    vertices = sorted(vertices)
-    index = {v: i for i, v in enumerate(vertices)}
+
+    return list(vertices), edges
+
+def build_adjacency_matrix(vertices, edges):
     n = len(vertices)
+    index = {v: i for i, v in enumerate(vertices)}
+
     A = np.zeros((n, n), dtype=float)
+
     for u, v in edges:
-        i, j = index[u], index[v]
-        A[i, j] = 1
-        A[j, i] = 1
+        i = index[u]
+        j = index[v]
+        A[i][j] = 1.0
+        A[j][i] = 1.0
+
     return A
 
 def hoffman_lower_bound(A):
-    eigenvalues = np.linalg.eigvalsh(A)  
-    lambda_max = max(eigenvalues)
-    lambda_min = min(eigenvalues)
-    if lambda_min == 0:  
+    if A.size == 0:
         return 1
-    bound = 1 + lambda_max / abs(lambda_min)
-    return int(np.ceil(bound))  
+
+    eigenvalues = np.linalg.eigvals(A)
+    lmax = max(eigenvalues)
+    lmin = min(eigenvalues)
+
+    # Hoffman formula
+    bound = 1 - (lmax / lmin)
+    return max(1, math.ceil(bound.real))
 
 def main():
-    A = read_graph_from_stdin()
-    bound = hoffman_lower_bound(A)
-    print(bound)
+    vertices, edges = read_graph_from_stdin()
+    A = build_adjacency_matrix(vertices, edges)
+    lb = hoffman_lower_bound(A)
+    print(lb)
 
 if __name__ == "__main__":
     main()

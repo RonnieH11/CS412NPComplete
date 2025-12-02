@@ -1,0 +1,10 @@
+Hoffman finds the lower bound for chromatic numbers, minimum number of colors required to color the vertices of a graph 
+such that no two adjacent vertices share the same color, which is what min graph coloring is finding. It does this by doing
+complicated math on a graph's adjacent matrix to find its eigenvalues which is handled by the python library NumPy. 
+
+Eigenvalues are mathmatical repersentations of the strength of the patterns of connected vertices. It takes the max, representing 
+the general strength of the connectivity in the graph, and the min, representing vertices forced apart by edges and cannot share a color, 
+eigenvalues and divides them. It then takes 1 and subtracts the quotient to account for even completly disconnected graphs still needing one color.
+
+So since these are mathmaical repersentations of the graph based on spectral graph theory this fromula produces a number that 
+is either less than or equal to the graph's chromatic number.   
