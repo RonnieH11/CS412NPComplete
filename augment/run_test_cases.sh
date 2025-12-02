@@ -1,4 +1,4 @@
-﻿TEST_DIR="test_cases"
+TEST_DIR="test_cases"
 
 PYTHON_SCRIPT="cs412_mingraphcoloring_augment.py"
 
