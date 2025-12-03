@@ -10,6 +10,7 @@ Analytical Runtime: O(V + E)
 
 import random
 
+
 def main():
     # Number of edges
     num_segs = int(input())
@@ -37,7 +38,6 @@ def main():
     for v in sorted(vertex_colors.keys()):
         print(f"{v} {vertex_colors[v]}")
 
-    
 
 # Greedy choice, For each vertex, give it the 
 # smallest color that is not used by its neighbors

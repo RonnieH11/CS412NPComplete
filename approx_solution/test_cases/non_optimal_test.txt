@@ -1,0 +1,16 @@
+15
+A B
+B C
+C A
+F1 A
+F1 B
+F2 A
+F2 C
+F3 B
+F3 C
+F4 A
+F4 B
+F5 A
+F5 C
+F6 B
+F6 C
