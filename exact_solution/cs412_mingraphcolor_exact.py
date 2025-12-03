@@ -1,60 +1,14 @@
-#!/usr/bin/env python3
 """
 cs412_mingraphcoloring_exact.py
 
-Exact (guaranteed optimal) solver for the minimum vertex coloring problem.
+Exact (optimal) solver for minimum vertex coloring problem.
 
-Output format (to stdout):
-
-    <k>
-    <vertex_name> <color>
-    <vertex_name> <color>
-    ...
-
-Where:
-    - k is the chromatic number (minimum number of colors),
-    - vertex_name is the vertex id from the input (here assumed 0..n-1),
-    - color is an integer in {0, 1, ..., k-1}.
-
-Input format (from file or stdin):
-
-    n
-    u1 v1
-    u2 v2
-    ...
-    (edges until EOF)
-
-OR
-
-    n m
-    u1 v1
-    u2 v2
-    ...
-    um vm
-
-Where:
-    - n is the number of vertices (vertices are 0,1,...,n-1),
-    - m is the number of edges (can be ignored when reading),
-    - each ui vi is an undirected edge between ui and vi.
 """
 
 import sys
 
 
 def read_graph(stream):
-    """
-    Read an undirected graph from the given text stream.
-
-    Supported headers:
-        n m      (typical)
-        m        (edge count only)
-
-    Vertices are determined from the edge endpoints. If there are no edges
-    but an n was provided, we assume vertices 0..n-1 exist (isolated).
-    Returns:
-        graph          : dict[int, set[int]] adjacency list on indices 0..N-1
-        index_to_label : list[str] mapping index -> original vertex label
-    """
     # Read first non-empty line
     header = stream.readline()
     if not header:
@@ -71,8 +25,8 @@ def read_graph(stream):
 
     edges = []
     vertex_labels = set()
-    header_n = None   # number of vertices from header (if any)
-    header_m = None   # number of edges from header / first line (if any)
+    header_n = None   # number of vertices from header
+    header_m = None   # number of edges from header
 
     def add_edge(u_lbl, v_lbl):
         # skip self loops
@@ -99,7 +53,7 @@ def read_graph(stream):
             add_edge(u_lbl, v_lbl)
             read_edges += 1
 
-    # Parse the header
+    # Parse header
     if len(parts) == 2 and all(p.lstrip("-").isdigit() for p in parts):
         # n m format
         header_n = int(parts[0])
@@ -107,12 +61,12 @@ def read_graph(stream):
         read_m_edges(header_m)
 
     elif len(parts) == 1 and parts[0].lstrip("-").isdigit():
-        # Single integer: treat as edge count m
+        # Single int, treat as edge count m
         header_m = int(parts[0])
         read_m_edges(header_m)
 
     elif len(parts) == 2:
-        # Not numeric "n m": treat as first edge u v
+        # treat as first edge u v
         u_lbl, v_lbl = parts
         add_edge(u_lbl, v_lbl)
         for line in stream:
@@ -132,7 +86,7 @@ def read_graph(stream):
     if not vertex_labels and header_n is not None:
         vertex_labels.update(str(i) for i in range(header_n))
 
-    # Still nothing? Empty graph.
+    # Empty graph.
     if not vertex_labels:
         return {}, []
 
@@ -189,11 +143,6 @@ def backtrack_with_k_colors(graph, vertex_order, index, color_assignment, max_co
 def find_minimum_vertex_coloring(graph):
     """
     Exact minimum coloring by trying k = 1..n with backtracking.
-
-    Returns:
-        (chi, color_assignment) where:
-          chi              : int, chromatic number
-          color_assignment : dict[int, int], mapping vertex -> color
     """
     if not graph:
         return 0, {}
