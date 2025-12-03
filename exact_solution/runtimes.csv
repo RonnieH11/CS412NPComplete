@@ -1,3 +1,11 @@
 test_case,seconds
 complete_10.txt,6.55
 complete_11.txt,90.77
+complete_12.txt,1528.85
+complete_5.txt,0.34
+cycle_15.txt,0.34
+dense_11.txt,0.49
+dense_20.txt,0.58
+path_12.txt,0.36
+path_20.txt,0.38
+tiny_triangle.txt,0.59
